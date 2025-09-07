@@ -121,7 +121,10 @@
                             <div data-label="Recinto">{{ $evento->horario->recinto->nombre ?? '' }}</div>
                             <div data-label="Fecha">{{ \Carbon\Carbon::parse($evento->fecha)->format('d/m/Y') }}</div>
                             <div data-label="Hora">{{ \Carbon\Carbon::parse($evento->hora_envio)->format('H:i') }}</div>
-                            <div data-label="Institución">{{ $evento->horario->recinto->institucion->nombre ?? '' }}</div>
+                            <div class="evento-field" data-label="Institución">
+                                    <span class="field-label d-lg-none">Institución:</span>
+                                    <span class="field-value">{{ $evento->institucion->nombre ?? '' }}</span>
+</div>
                             <div data-label="Prioridad">
                                 <span class="badge bg-secondary">
                                     {{ ucfirst($evento->prioridad) }}
@@ -186,7 +189,10 @@
                             <input type="text" value="{{ $evento->usuario->name ?? 'N/A' }}" disabled>
 
                             <label>Institución:</label>
-                            <input type="text" value="{{ $evento->horario->recinto->institucion->nombre ?? '' }}" disabled>
+                            <input type="text" value="{{ $evento->institucion->nombre ?? '' }}" disabled>
+
+                            <label>Recinto:</label>
+                            <input type="text" value="{{ $evento->horario->recinto->nombre ?? '' }}" disabled>
 
                             <label>SubÁrea:</label>
                             <input type="text" value="{{ $evento->subarea->nombre ?? '' }}" disabled>

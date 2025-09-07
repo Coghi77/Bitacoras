@@ -112,7 +112,6 @@
                 <div class="col-recinto">Recinto</div>
                 <div class="col-fecha">Fecha</div>
                 <div class="col-hora">Hora</div>
-                <div class="col-institucion">Institución</div>
                 <div class="col-prioridad">Prioridad</div>
                 <div class="col-estado">Estado</div>
                 <div class="col-detalles">Detalles</div>
@@ -298,107 +297,172 @@ async function cargarEventos() {
 const intervalId = setInterval(cargarEventos, 3000);
 
 // Función para abrir modal
-function abrirModal(id) {
-    // Buscar el evento específico en los datos
-    fetch(`/evento/${id}/details`, {
-        method: 'GET',
-        headers: {
-            'Accept': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-        }
-    })
-    .then(response => response.json())
-    .then(evento => {
-        const estadoOptions = {
-            'en_espera': 'En espera',
-            'en_proceso': 'En proceso', 
-            'completado': 'Completado'
-        };
-        
-        const modalHTML = `
-            <div class="modal-contenido">
-                <div class="modal-encabezado">
-                    <span class="icono-atras" onclick="Swal.close()">
-                        <i>
-                            <img width="40" height="40" src="https://img.icons8.com/external-solid-adri-ansyah/64/FAB005/external-ui-basic-ui-solid-adri-ansyah-26.png" alt="icono volver"/>
-                        </i>
-                    </span>
-                    <h1 class="titulo">Detalles</h1>
-                </div>
-
-                <div class="modal-cuerpo">
-                    <div class="row">
-                        <div class="col">
-                            <label>Docente:</label>
-                            <input type="text" value="${evento.docente}" disabled>
-
-                            <label>Institución:</label>
-                            <input type="text" value="${evento.institucion}" disabled>
-
-                            <label>SubÁrea:</label>
-                            <input type="text" value="${evento.subarea}" disabled>
-
-                            <label>Sección:</label>
-                            <input type="text" value="${evento.seccion}" disabled>
-
-                            <label>Especialidad:</label>
-                            <input type="text" value="${evento.especialidad}" disabled>
-                        </div>
-
-                        <div class="col">
-                            <label>Fecha:</label>
-                            <input type="text" value="${evento.fecha}" disabled>
-                            
-                            <label>Hora:</label>
-                            <input type="text" value="${evento.hora}" disabled>
-                            
-                            <label>Recinto:</label>
-                            <input type="text" value="${evento.recinto}" disabled>
-
-                            <label>Prioridad:</label>
-                            <input type="text" value="${evento.prioridad}" disabled>
-
-                            <label>Estado:</label>
-                            <select class="form-select mb-3" id="estado-${id}">
-                                ${Object.entries(estadoOptions).map(([key, value]) => 
-                                    `<option value="${key}" ${evento.estado === key ? 'selected' : ''}>${value}</option>`
-                                ).join('')}
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="observaciones mt-3">
-                        <label>Observaciones:</label>
-                        <textarea disabled>${evento.observaciones || ''}</textarea>
-                    </div>
-
-                    <div class="mt-4 d-flex justify-content-center">
-                        <button type="button" class="btn btn-primary px-4 py-2" style="background-color:#134496; min-width:150px;" onclick="guardarEstado(${id})">
-                            <i class="bi bi-save me-2"></i>Guardar cambios
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `;
-
-        Swal.fire({
-            html: modalHTML,
-            width: '80%',
-            showConfirmButton: false,
-            showCloseButton: false,
-            customClass: {
-                container: 'modal-detalles-container',
-                popup: 'bg-transparent',
-                content: 'bg-transparent'
+// Función para abrir modal
+    function abrirModal(id) {
+        // Buscar el evento específico en los datos
+        fetch(`/evento/${id}/details`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(evento => {
+            console.log('Datos del evento cargados:', evento);
+            
+            const estadoOptions = {
+                'en_espera': 'En espera',
+                'en_proceso': 'En proceso', 
+                'completado': 'Completado'
+            };
+            
+            const modalHTML = `
+                <div class="modal-contenido">
+                    <div class="modal-encabezado">
+                        <span class="icono-atras" onclick="Swal.close()">
+                            <i>
+                                <img width="40" height="40" src="https://img.icons8.com/external-solid-adri-ansyah/64/FAB005/external-ui-basic-ui-solid-adri-ansyah-26.png" alt="icono volver"/>
+                            </i>
+                        </span>
+                        <h1 class="titulo">Detalles</h1>
+                    </div>
+
+                    <div class="modal-cuerpo">
+                        <div class="row">
+                            <div class="col">
+                                <label>Docente:</label>
+                                <input type="text" value="${evento.docente}" disabled>
+
+                                <label>SubÁrea:</label>
+                                <input type="text" value="${evento.subarea}" disabled>
+
+                                <label>Sección:</label>
+                                <input type="text" value="${evento.seccion}" disabled>
+                                
+
+                                <label>Especialidad:</label>
+                                <input type="text" value="${evento.especialidad}" disabled>
+                            </div>
+
+                            <div class="col">
+                                <label>Fecha:</label>
+                                <input type="text" value="${evento.fecha}" disabled>
+                                
+                                <label>Hora:</label>
+                                <input type="text" value="${evento.hora}" disabled>
+                                
+                                <label>Recinto:</label>
+                                <input type="text" value="${evento.recinto}" disabled>
+
+                                <label>Prioridad:</label>
+                                <input type="text" value="${evento.prioridad}" disabled>
+
+                                <label>Estado:</label>
+                                <select class="form-select mb-3" id="estado-${id}">
+                                    ${Object.entries(estadoOptions).map(([key, value]) => 
+                                        `<option value="${key}" ${evento.estado === key ? 'selected' : ''}>${value}</option>`
+                                    ).join('')}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="observaciones mt-3">
+                            <label>Observaciones:</label>
+                            <textarea disabled>${evento.observaciones || ''}</textarea>
+                        </div>
+
+                        <div class="mt-4 d-flex justify-content-center">
+                            <button type="button" class="btn btn-primary px-4 py-2" style="background-color:#134496; min-width:150px;" onclick="guardarEstado(${id})">
+                                <i class="bi bi-save me-2"></i>Guardar cambios
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            Swal.fire({
+                html: modalHTML,
+                width: '80%',
+                showConfirmButton: false,
+                showCloseButton: false,
+                customClass: {
+                    container: 'modal-detalles-container',
+                    popup: 'bg-transparent',
+                    content: 'bg-transparent'
+                }
+            });
+        })
+        .catch(error => {
+            console.error('Error al cargar detalles:', error);
+            Swal.fire('Error', 'No se pudieron cargar los detalles del evento', 'error');
         });
-    })
-    .catch(error => {
-        console.error('Error al cargar detalles:', error);
-        Swal.fire('Error', 'No se pudieron cargar los detalles del evento', 'error');
-    });
-}
+    }
+
+    // También actualiza la función guardarEstado para mejor manejo de errores:
+    async function guardarEstado(id) {
+        const selectElement = document.getElementById(`estado-${id}`);
+        
+        if (!selectElement) {
+            console.error('No se encontró el elemento select para el estado');
+            Swal.fire('Error', 'No se pudo encontrar el campo de estado', 'error');
+            return;
+        }
+        
+        const nuevoEstado = selectElement.value;
+        
+        console.log('Guardando estado:', { id, nuevoEstado });
+        
+        try {
+            const response = await fetch(`/evento/${id}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ estado: nuevoEstado })
+            });
+            
+            console.log('Response status:', response.status);
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Error response:', errorText);
+                throw new Error(`HTTP ${response.status}: ${errorText}`);
+            }
+            
+            const data = await response.json();
+            console.log('Respuesta backend:', data);
+            
+            if (data.success) {
+                Swal.fire({
+                    title: '¡Guardado!',
+                    text: 'El estado del evento se actualizó correctamente.',
+                    icon: 'success',
+                    timer: 2000,
+                    showConfirmButton: false
+                }).then(() => {
+                    // Cerrar el modal y recargar los datos
+                    Swal.close();
+                    // Recargar la lista de eventos sin recargar toda la página
+                    cargarEventos();
+                });
+            } else {
+                throw new Error(data.message || 'No se pudo guardar el estado.');
+            }
+        } catch (error) {
+            console.error('Error en fetch:', error);
+            Swal.fire('Error', error.message || 'Error al procesar la solicitud', 'error');
+        }
+    }
 
 function cerrarModal(id) {
     Swal.close();

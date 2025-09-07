@@ -483,68 +483,106 @@ class EventoController extends Controller
 
 
 
+    
+    
     public function update(Request $request, $id)
     {
         try {
-            Log::info(implode($request->all()));
-            Log::info('Intentando actualizar evento', [
-                'id' => $id,
-                'request_all' => $request->all(),
-                'raw_input' => file_get_contents('php://input'),
-                'headers' => $request->headers->all()
+            Log::info('=== INICIO UPDATE EVENTO SOPORTE ===', [
+                'evento_id' => $id,
+                'request_data' => $request->all(),
+                'is_json' => $request->isJson(),
+                'content_type' => $request->header('Content-Type')
             ]);
 
-            $evento = Evento::findOrFail($id);
-
-            // Validar estado obligatorio y correcto
-            $rules = [
-                'estado' => 'required|in:en_espera,en_proceso,completado',
-                'observacion' => 'sometimes|nullable|string',
-                'prioridad' => 'sometimes|nullable|in:alta,media,regular,baja'
-            ];
-            $validated = $request->validate($rules);
-
-            Log::info('Datos validados para update', $validated);
-
-            $evento->estado = $validated['estado'];
-            if (array_key_exists('prioridad', $validated)) {
-                $evento->prioridad = $validated['prioridad'];
+            // Verificar si el evento existe
+            $evento = Evento::find($id);
+            
+            if (!$evento) {
+                Log::error('Evento no encontrado', ['id' => $id]);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Evento no encontrado'
+                ], 404);
             }
+
+            // Validación específica para estado
+            $rules = [];
+            if ($request->has('estado')) {
+                $rules['estado'] = 'required|in:en_espera,en_proceso,completado';
+            }
+            if ($request->has('prioridad')) {
+                $rules['prioridad'] = 'in:alta,media,regular,baja';
+            }
+            if ($request->has('observacion')) {
+                $rules['observacion'] = 'nullable|string|max:1000';
+            }
+
+            try {
+                $validated = $request->validate($rules);
+                Log::info('Validación exitosa:', $validated);
+            } catch (\Illuminate\Validation\ValidationException $ve) {
+                Log::error('Error de validación:', [
+                    'errors' => $ve->errors(),
+                    'input_data' => $request->all()
+                ]);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Datos inválidos.',
+                    'errors' => $ve->errors()
+                ], 422);
+            }
+
+            // Actualizar los campos
+            if (isset($validated['estado'])) {
+                $evento->estado = $validated['estado'];
+                Log::info('Estado actualizado a: ' . $validated['estado']);
+            }
+
+            if (isset($validated['prioridad'])) {
+                $evento->prioridad = $validated['prioridad'];
+                Log::info('Prioridad actualizada a: ' . $validated['prioridad']);
+            }
+
             if (array_key_exists('observacion', $validated)) {
                 $evento->observacion = $validated['observacion'];
+                Log::info('Observación actualizada');
             }
 
-            $evento->save();
+            // Guardar cambios
+            $saved = $evento->save();
+            
+            if (!$saved) {
+                Log::error('Error al guardar evento');
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error al guardar los cambios'
+                ], 500);
+            }
 
-            Log::info('Evento actualizado correctamente', [
-                'evento_id' => $evento->id,
-                'nuevo_estado' => $evento->estado
-            ]);
+            Log::info('Evento actualizado exitosamente');
 
             return response()->json([
                 'success' => true,
                 'message' => 'Evento actualizado correctamente.',
-                'estado' => $evento->estado
+                'data' => [
+                    'id' => $evento->id,
+                    'estado' => $evento->estado,
+                    'prioridad' => $evento->prioridad,
+                    'observacion' => $evento->observacion
+                ]
             ]);
-        } catch (\Illuminate\Validation\ValidationException $ve) {
-            Log::warning('Validación fallida al actualizar evento', [
-                'id' => $id,
-                'errors' => $ve->errors()
-            ]);
-            return response()->json([
-                'success' => false,
-                'message' => 'Datos inválidos para actualizar el evento.',
-                'errors' => $ve->errors()
-            ], 422);
+
         } catch (\Exception $e) {
-            Log::error('Error al actualizar evento', [
-                'id' => $id,
+            Log::error('=== ERROR EN UPDATE EVENTO ===', [
+                'evento_id' => $id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
+
             return response()->json([
                 'success' => false,
-                'message' => 'Error al actualizar el evento: ' . $e->getMessage()
+                'message' => 'Error interno del servidor'
             ], 500);
         }
     }

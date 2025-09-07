@@ -551,14 +551,7 @@
                             <label class="form-label">Especialidad:</label>
                             <input type="text" class="form-control" value="${evento.subarea?.especialidad?.nombre ?? ''}" disabled>
                         </div>
-                        <div class="col-12 col-md-6">
-                            <label class="form-label">Fecha:</label>
-                            <input type="text" class="form-control" value="${evento.fecha_formateada}" disabled>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label class="form-label">Hora:</label>
-                            <input type="text" class="form-control" value="${evento.hora_formateada}" disabled>
-                        </div>
+                        
                         <div class="col-12">
                             <label class="form-label">Recinto:</label>
                             <input type="text" class="form-control" value="${evento.horario.recinto.nombre ?? ''}" disabled>
@@ -635,24 +628,40 @@
 
         async function guardarCambios(id, data) {
             try {
-                const formData = new FormData();
-                formData.append('prioridad', data.prioridad);
-                formData.append('observacion', data.observacion);
+                console.log('Datos a enviar:', data);
+                
+                // Preparar los datos como JSON en lugar de FormData
+                const requestData = {
+                    prioridad: data.prioridad,
+                    observacion: data.observacion
+                };
+                
                 if (data.estado) {
-                    formData.append('estado', data.estado);
+                    requestData.estado = data.estado;
                 }
 
-                formData.append('_token', document.querySelector('meta[name="csrf-token"]').content);
-
-                console.error(data);
-                console.error(formData);
+                console.log('Request data:', requestData);
 
                 const response = await fetch(`/evento/${id}`, {
                     method: 'PATCH',
-                    body: formData
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify(requestData)
                 });
 
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
                 const result = await response.json();
+                console.log('Response data:', result);
 
                 if (result.success) {
                     Swal.fire({
@@ -663,18 +672,19 @@
                         showConfirmButton: false,
                         timer: 2500
                     });
-                    location.reload();
+                    // Recargar los eventos en lugar de toda la página
+                    await cargarEventos();
                 } else {
                     throw new Error(result.message || 'Error al guardar cambios');
                 }
 
             } catch (error) {
+                console.error('Error completo:', error);
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
-                    text: error.message
+                    text: error.message || 'Error al procesar la solicitud'
                 });
-                console.error(data);
             }
         }
 
