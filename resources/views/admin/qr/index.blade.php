@@ -84,9 +84,14 @@
                                     </button>
                                    
                                     @if(!$qr->usado && \Carbon\Carbon::parse($qr->expira_en) > now())
-                                        <button class="btn btn-outline-danger btn-sm ms-2 btn-escanear"
-                                                data-qr-code="{{ $qr->codigo_qr }}">
-                                            <i class="bi bi-upc-scan"></i> Solicitar
+                                        <button class="btn {{ $qr->llave_estado == 0 ? 'btn-outline-success' : 'btn-outline-warning' }} btn-sm ms-2 btn-escanear"
+                                                data-qr-code="{{ $qr->codigo_qr }}"
+                                                data-llave-estado="{{ $qr->llave_estado }}">
+                                            @if($qr->llave_estado == 0)
+                                                <i class="bi bi-key"></i> Tomar llave
+                                            @else
+                                                <i class="bi bi-arrow-return-left"></i> Devolver llave
+                                            @endif
                                         </button>
                                     @endif
                                 </div>
@@ -205,11 +210,13 @@ $(document).ready(function() {
         console.log('Click en escanear QR detectado');
         const button = $(this);
         const qrCode = button.data('qr-code');
+        const llaveEstado = button.data('llave-estado');
        
         console.log('QR Code para escanear:', qrCode);
+        console.log('Estado de la llave:', llaveEstado);
        
         if (!qrCode) {
-            showToast('Cdigo QR no encontrado', 'error');
+            showToast('Código QR no encontrado', 'error');
             return;
         }
        
@@ -219,11 +226,29 @@ $(document).ready(function() {
         
         if (modal.length === 0) {
             console.error('Modal no encontrado, usando confirm como fallback');
-            if (!confirm('¿Simular escaneo? Esto cambiará el estado de la llave.')) {
+            const accion = llaveEstado == 0 ? 'tomar la llave' : 'devolver la llave';
+            if (!confirm(`¿Simular escaneo para ${accion}? Esto cambiará el estado de la llave.`)) {
                 return;
             }
             performScan(button, qrCode);
             return;
+        }
+       
+        // Actualizar contenido del modal según el estado de la llave
+        const modalTitle = modal.find('#scanSimulationModalLabel');
+        const modalBody = modal.find('.modal-body h5');
+        const confirmBtn = modal.find('#confirmScanBtn');
+        
+        if (llaveEstado == 0) {
+            // Estado "Entregada" - próxima acción es "Tomar llave"
+            modalTitle.html('<i class="bi bi-key me-2"></i>Tomar llave');
+            modalBody.text('¿Estás seguro de tomar la llave?');
+            confirmBtn.html('<i class="bi bi-check-circle me-1"></i>Confirmar tomar llave');
+        } else {
+            // Estado "No Entregada" - próxima acción es "Devolver llave"
+            modalTitle.html('<i class="bi bi-arrow-return-left me-2"></i>Devolver llave');
+            modalBody.text('¿Estás seguro de devolver la llave?');
+            confirmBtn.html('<i class="bi bi-check-circle me-1"></i>Confirmar devolver llave');
         }
        
         // Mostrar modal
@@ -233,8 +258,9 @@ $(document).ready(function() {
         // Guardar datos en el modal para usarlos después
         modal.data('scanButton', button);
         modal.data('qrCode', qrCode);
+        modal.data('llaveEstado', llaveEstado);
         
-        console.log('Modal mostrado con datos:', {qrCode});
+        console.log('Modal mostrado con datos:', {qrCode, llaveEstado});
     });
 
     // Manejar confirmación del modal
@@ -442,9 +468,13 @@ $(document).ready(function() {
                                 <i class="bi bi-eye"></i> Ver QR
                             </button>
                             ${!qr.usado ? `
-                                <button class="btn btn-outline-danger btn-sm ms-2 btn-escanear"
-                                        data-qr-code="${qr.codigo_qr}">
-                                    <i class="bi bi-upc-scan"></i> Simular Escaneo
+                                <button class="btn ${qr.llave_estado == 0 ? 'btn-outline-success' : 'btn-outline-warning'} btn-sm ms-2 btn-escanear"
+                                        data-qr-code="${qr.codigo_qr}"
+                                        data-llave-estado="${qr.llave_estado}">
+                                    ${qr.llave_estado == 0 ? 
+                                        '<i class="bi bi-key"></i> Tomar llave' : 
+                                        '<i class="bi bi-arrow-return-left"></i> Devolver llave'
+                                    }
                                 </button>
                             ` : ''}
                         </div>

@@ -119,12 +119,19 @@
                                 </div>
                                
                                 <div class="text-center mt-auto">
-                                    <button class="btn btn-success btn-generar-qr w-100"
+                                    <button class="btn {{ $item->llave_estado == 0 ? 'btn-success' : 'btn-warning' }} btn-generar-qr w-100"
                                             data-recinto-id="{{ $item->recinto_id }}"
                                             data-llave-id="{{ $item->llave_id }}"
                                             data-recinto-nombre="{{ $item->recinto_nombre }}"
-                                            data-llave-nombre="{{ $item->llave_nombre }}">
-                                       <span>Generar solicitud</span>
+                                            data-llave-nombre="{{ $item->llave_nombre }}"
+                                            data-llave-estado="{{ $item->llave_estado }}">
+                                       <span>
+                                           @if($item->llave_estado == 0)
+                                               <i class="bi bi-key"></i> Tomar llave
+                                           @else
+                                               <i class="bi bi-arrow-return-left"></i> Devolver llave
+                                           @endif
+                                       </span>
                                     </button>
                                 </div>
                             </div>
@@ -269,7 +276,7 @@ $(document).ready(function() {
                     // Mostrar modal
                     $('#qrModal').modal('show');
                    
-                    // Recargar página después de cerrar modal
+                    // Recargar página después de cerrar modal para actualizar estados
                     $('#qrModal').on('hidden.bs.modal', function () {
                         location.reload();
                     });
@@ -280,7 +287,12 @@ $(document).ready(function() {
                 alert('Error: ' + error);
             },
             complete: function() {
-                button.prop('disabled', false).html('<i class="bi bi-qr-code"></i> Generar QR');
+                const llaveEstado = button.data('llave-estado');
+                if (llaveEstado == 0) {
+                    button.prop('disabled', false).html('<i class="bi bi-key"></i> Tomar llave');
+                } else {
+                    button.prop('disabled', false).html('<i class="bi bi-arrow-return-left"></i> Devolver llave');
+                }
             }
         });
     });
