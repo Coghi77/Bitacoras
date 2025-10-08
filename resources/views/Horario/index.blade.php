@@ -1095,6 +1095,27 @@ document.addEventListener('DOMContentLoaded', function() {
             
             filtrarLeccionesEditar{{ $horario->id }}('{{ $modalidadInicial }}');
         });
+
+        // Limpiar checkboxes cuando se cambie de día
+        const selectDiaEditar{{ $horario->id }} = document.querySelector('#modalEditarHorario{{ $horario->id }} select[name="dia"]');
+        if (selectDiaEditar{{ $horario->id }}) {
+            let diaOriginal = selectDiaEditar{{ $horario->id }}.value;
+            
+            selectDiaEditar{{ $horario->id }}.addEventListener('change', function() {
+                const nuevoDay = this.value;
+                
+                // Si cambió el día, limpiar todos los checkboxes
+                if (diaOriginal !== nuevoDay) {
+                    const checkboxes = document.querySelectorAll('#modalEditarHorario{{ $horario->id }} input[name="lecciones[]"]');
+                    checkboxes.forEach(checkbox => {
+                        checkbox.checked = false;
+                    });
+                    
+                    // Actualizar el día original
+                    diaOriginal = nuevoDay;
+                }
+            });
+        }
     })();
     @endforeach
     
