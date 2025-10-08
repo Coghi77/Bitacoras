@@ -1,7 +1,7 @@
 @extends('Template-administrador')
 
 
-@section('title', 'QR Temporales Activos')
+@section('title', 'Solicitud de llaves activas')
 
 
 @section('content')
@@ -9,7 +9,7 @@
     <div class="main-content">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="mb-0">
-                <i class="bi bi-qr-code-scan"></i> QR Temporales Activos
+                <i class="bi bi-qr-code-scan"></i> Solicitudes de Llaves Activas
             </h2>
             <div class="d-flex align-items-center">
                 <span class="badge bg-primary me-2" id="total-qrs">{{ $qrsTemporales->count() }}</span>
@@ -57,7 +57,7 @@
                                     <strong><i class="bi bi-key"></i> Llave:</strong>
                                     {{ $qr->llave_nombre }}
                                     <span class="badge {{ $qr->llave_estado == 0 ? 'bg-success' : 'bg-warning' }} ms-1 llave-estado-badge" data-llave-estado="{{ $qr->llave_estado }}">
-                                        {{ $qr->llave_estado == 0 ? 'Entregada' : 'No Entregada' }}
+                                        {{ $qr->llave_estado == 0 ? 'Solicitar' : 'No Entregada' }}
                                     </span>
                                 </div>
                                

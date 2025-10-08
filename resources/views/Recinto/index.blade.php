@@ -424,6 +424,43 @@
                 </div>
             </div>
             </div>
+
+            <!-- Modal de Validación de Errores -->
+            <div class="modal fade" id="modalValidacionErrores" tabindex="-1" aria-labelledby="modalValidacionErroresLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content" style="border-radius: 20px; border: none; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+                        <div class="modal-body text-center p-4">
+                            <!-- Icono de error -->
+                            <div class="mb-3">
+                                <div class="error-icon-container mx-auto" style="width: 80px; height: 80px; background: linear-gradient(135deg, #ff6b6b 0%, #c92a2a 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(201, 42, 42, 0.3);">
+                                    <i class="bi bi-exclamation-triangle" style="font-size: 2.5rem; color: white;"></i>
+                                </div>
+                            </div>
+
+                            <!-- Título -->
+                            <h4 class="mb-3" style="color: #2c3e50; font-weight: 600;">
+                                <i class="bi bi-shield-x me-2"></i>Error de Validación
+                            </h4>
+
+                            <!-- Lista de errores -->
+                            <div class="alert alert-danger text-start mx-auto" style="max-width: 90%; border-radius: 12px; background-color: #ffe3e3; border: 2px solid #ff6b6b;">
+                                <div class="d-flex align-items-start mb-2">
+                                    <i class="bi bi-info-circle-fill me-2 mt-1" style="color: #c92a2a;"></i>
+                                    <strong style="color: #c92a2a;">Por favor corrija los siguientes errores:</strong>
+                                </div>
+                                <ul class="mb-0 ps-4" id="listaErroresValidacion" style="color: #721c24;">
+                                    <!-- Los errores se insertarán aquí -->
+                                </ul>
+                            </div>
+
+                            <!-- Botón -->
+                            <button type="button" class="btn btn-primary rounded-pill px-5 py-2 mt-3" data-bs-dismiss="modal" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; font-weight: 600; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); transition: transform 0.2s;">
+                                <i class="bi bi-check-circle me-2"></i>Entendido
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -513,6 +550,52 @@
     border-color: #86b7fe;
     outline: 0;
     box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Estilos para el modal de validación de errores */
+#modalValidacionErrores .modal-content {
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+#modalValidacionErrores .error-icon-container {
+    animation: bounce 0.6s ease-out;
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-10px);
+    }
+    60% {
+        transform: translateY(-5px);
+    }
+}
+
+#modalValidacionErrores .btn-primary:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
+}
+
+#modalValidacionErrores .btn-primary:active {
+    transform: translateY(0) !important;
+}
+
+#listaErroresValidacion li {
+    line-height: 1.6;
+    font-size: 0.95rem;
 }
 </style>
 
@@ -824,6 +907,59 @@ function generarQRDevolucion(recintoId, numeroLlave, nombreRecinto) {
         qrDiv.style.display = 'block';
     });
 }
+
+// Mostrar modal de errores si hay errores de validación
+document.addEventListener('DOMContentLoaded', function() {
+    @if($errors->any())
+        const errores = [
+            @foreach($errors->all() as $error)
+                "{{ $error }}",
+            @endforeach
+        ];
+        
+        if (errores.length > 0) {
+            const listaErrores = document.getElementById('listaErroresValidacion');
+            listaErrores.innerHTML = '';
+            
+            errores.forEach(error => {
+                const li = document.createElement('li');
+                li.textContent = error;
+                li.style.marginBottom = '8px';
+                listaErrores.appendChild(li);
+            });
+            
+            const modalValidacion = new bootstrap.Modal(document.getElementById('modalValidacionErrores'));
+            modalValidacion.show();
+            
+            @if(session('modal_crear'))
+                // Si el error vino del modal de crear, volver a abrirlo cuando se cierre el modal de errores
+                document.getElementById('modalValidacionErrores').addEventListener('hidden.bs.modal', function () {
+                    const modalCrear = new bootstrap.Modal(document.getElementById('modalAgregarRecinto'));
+                    modalCrear.show();
+                }, { once: true });
+            @elseif(session('modal_editar_id'))
+                // Si el error vino del modal de editar, volver a abrirlo cuando se cierre el modal de errores
+                document.getElementById('modalValidacionErrores').addEventListener('hidden.bs.modal', function () {
+                    const modalEditar = new bootstrap.Modal(document.getElementById('modalEditarRecinto-{{ session("modal_editar_id") }}'));
+                    modalEditar.show();
+                }, { once: true });
+            @endif
+        }
+    @endif
+});
+
+// Agregar efecto hover al botón
+document.addEventListener('DOMContentLoaded', function() {
+    const btnEntendido = document.querySelector('#modalValidacionErrores .btn-primary');
+    if (btnEntendido) {
+        btnEntendido.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px)';
+        });
+        btnEntendido.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    }
+});
 </script>
 @endsection
 

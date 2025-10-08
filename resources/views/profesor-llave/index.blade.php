@@ -107,7 +107,7 @@
                                         <i class="bi bi-building"></i> {{ $item->recinto_nombre }}
                                     </h6>
                                     <span class="badge {{ $item->llave_estado == 0 ? 'bg-success' : 'bg-warning text-dark' }} ms-2 flex-shrink-0">
-                                        <span class="d-none d-sm-inline">{{ $item->llave_estado == 0 ? 'Entregada' : 'No Entregada' }}</span>
+                                        <span class="d-none d-sm-inline">{{ $item->llave_estado == 0 ? 'Solicitar' : 'No Entregada' }}</span>
                                         <span class="d-sm-none">{{ $item->llave_estado == 0 ? '✓' : '✗' }}</span>
                                     </span>
                                 </div>

@@ -34,24 +34,26 @@ class StoreRecintoRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'nombre.required' => 'El nombre del  recinto es obligatorio.',
+            'nombre.required' => 'El nombre del recinto es obligatorio.',
             'nombre.string' => 'El nombre debe ser un texto válido.',
             'nombre.max' => 'El nombre no puede exceder los 55 caracteres.',
             'nombre.unique' => 'Ya existe un recinto con este nombre.',
-            'id_institucion.required' => 'La institución es obligatoria.',
-            'id_institucion.integer' => 'La institución debe ser un número entero.',
-            'id_institucion.exists' => 'La institución seleccionada no es válida.',
-            'id_llave.required' => 'La llave es obligatoria.',
-            'id_llave.integer' => 'La llave debe ser un número entero.',
-            'id_llave.exists' => 'La llave seleccionada no es válida.',
-            'id_llave.unique' => 'Ya existe un recinto con esta llave.',
             
-            'id_estadoRecinto.required' => 'El estado del recinto es obligatorio.',
-            'id_estadoRecinto.integer' => 'El estado del recinto debe ser un número entero.',
-            'id_estadoRecinto.exists' => 'El estado del recinto seleccionado no es válido.',
-            'id_tipoRecinto.required' => 'El tipo de recinto es obligatorio.',
-            'id_tipoRecinto.integer' => 'El tipo de recinto debe ser un número entero.',
-            'id_tipoRecinto.exists' => 'El tipo de recinto seleccionado no es válido.',
+            'institucion_id.required' => 'Debe seleccionar al menos una institución.',
+            'institucion_id.array' => 'Las instituciones deben ser válidas.',
+            'institucion_id.min' => 'Debe seleccionar al menos una institución.',
+            'institucion_id.*.required' => 'Cada institución debe ser válida.',
+            'institucion_id.*.exists' => 'Una de las instituciones seleccionadas no es válida.',
+            
+            'llave_id.required' => 'El número de llave es obligatorio.',
+            'llave_id.exists' => 'La llave seleccionada no es válida.',
+            'llave_id.unique' => 'Esta llave ya está asignada a otro recinto.',
+            
+            'estadoRecinto_id.required' => 'El estado del recinto es obligatorio.',
+            'estadoRecinto_id.exists' => 'El estado seleccionado no es válido.',
+            
+            'tipoRecinto_id.required' => 'El tipo de recinto es obligatorio.',
+            'tipoRecinto_id.exists' => 'El tipo de recinto seleccionado no es válido.',
         ];
     }
 

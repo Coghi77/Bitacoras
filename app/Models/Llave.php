@@ -42,7 +42,7 @@ class Llave extends Model
     {
         switch ($this->estado) {
             case self::ESTADO_NO_ENTREGADA: // 0
-                return 'Entregada';
+                return 'Solicitar';
             case self::ESTADO_ENTREGADA: // 1
                 return 'No Entregada';
             default:
