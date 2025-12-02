@@ -27,6 +27,7 @@ return new class extends Migration
             $table->boolean('confirmacion');
             $table->tinyInteger('condicion')->default(1);
             $table->enum('estado', ['en_espera', 'en_proceso', 'completado'])->default('en_espera');
+            $table->boolean('enviar_soporte');
             $table->timestamps();
         });
     }

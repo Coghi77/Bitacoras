@@ -406,6 +406,7 @@ class EventoController extends Controller
             $evento->hora_envio = now()->format('H:i:s');
             $evento->fecha = now();
             $evento->observacion = $request->observacion;
+            $evento->enviar_soporte = $request->has('enviar_soporte') ? 1 : 0;
             $evento->prioridad = $request->prioridad;
             $evento->confirmacion = false;
             $evento->condicion = 1;
@@ -570,7 +571,8 @@ class EventoController extends Controller
                     'id' => $evento->id,
                     'estado' => $evento->estado,
                     'prioridad' => $evento->prioridad,
-                    'observacion' => $evento->observacion
+                    'observacion' => $evento->observacion,
+                    'enviar_soporte' => $evento->enviar_soporte
                 ]
             ]);
 
@@ -716,6 +718,7 @@ class EventoController extends Controller
                 'recinto' => $evento->horario->recinto->nombre ?? '',
                 'prioridad' => ucfirst($evento->prioridad),
                 'estado' => $evento->estado,
+                'enviar_soporte' => $evento->enviar_soporte,
                 'observaciones' => $evento->observacion ?? ''
             ]);
         } catch (\Exception $e) {

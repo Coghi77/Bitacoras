@@ -112,6 +112,17 @@
                     <label for="observacionInput"><i class="bi bi-chat-text me-2"></i>Observaciones</label>
                   </div>
                 </div>
+                <div class="col-md-4">
+                  <div class="form-floating">
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" name="enviar_soporte" id="enviarSoporte" value="0">
+                      <label for="enviarSoporte">
+                        <i class="bi bi-send-check me-2"></i>Enviar a soporte
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
                 <div class="col-md-12">
                   <div class="form-floating mb-3">
                     <select name="prioridad" class="form-select" id="prioridadSelect" required>

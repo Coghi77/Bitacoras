@@ -22,6 +22,7 @@ class Evento extends Model
         'observacion',
         'prioridad',
         'estado',
+        'enviar_soporte',
         'confirmacion'
     ];
 
