@@ -1,4 +1,5 @@
 @foreach ($eventos as $evento)
+    @if($evento->enviar_soporte)
     <div class="record-row hover-effect">
         <div data-label="Docente">{{ $evento->usuario->name ?? 'N/A' }}</div>
         <div data-label="Recinto">{{ $evento->horario->recinto->nombre ?? '' }}</div>
@@ -40,4 +41,5 @@
             </button>
         </div>
     </div>
+    @endif
 @endforeach

@@ -42,12 +42,13 @@
                         </li>
                         @if(isset($recintos) && $recintos->count() > 0)
                             @foreach($recintos as $recinto)
-                            <li>
-                                <a class="dropdown-item filtro-item" href="#" data-filtro="{{ $recinto->id }}" data-tipo="recinto">
-                                    <i class="bi bi-geo-alt-fill me-2"></i>
-                                    {{ $recinto->nombre }}
-                                </a>
-                            </li>
+                                        <li>
+                                            <a class="dropdown-item filtro-item" href="#" 
+                                            data-filtro="{{ $recinto->id }}" data-tipo="recinto">
+                                                <i class="bi bi-geo-alt-fill me-2"></i>
+                                                {{ $recinto->nombre }}
+                                            </a>
+                                        </li>
                             @endforeach
                         @else
                             <li>
