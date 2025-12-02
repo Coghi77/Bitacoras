@@ -5,6 +5,7 @@
         <div data-label="Recinto">{{ $evento->horario->recinto->nombre ?? '' }}</div>
         <div data-label="Fecha">{{ \Carbon\Carbon::parse($evento->fecha)->format('d/m/Y') }}</div>
         <div data-label="Hora">{{ \Carbon\Carbon::parse($evento->hora_envio)->format('H:i') }}</div>
+        <div data-label="Institucion">{{ $evento->institucion->nombre ?? 'N/A' }}</div>
         <div data-label="Prioridad">
             <span class="badge bg-secondary text-white" style="background-color: #6c757d !important; color: #fff !important;">
                 {{ ucfirst($evento->prioridad) }}
@@ -36,7 +37,7 @@
         <div data-label="Detalles">
             <button class="btn btn-sm rounded-pill px-3" 
                     style="background-color: #134496; color: white;"
-                    onclick="abrirModal({{ $evento->id }})">
+                    onclick='abrirModalProfesor(@json($evento))'>
                 <i class="bi bi-pencil-square me-1"></i> Editar
             </button>
         </div>

@@ -483,10 +483,6 @@ class EventoController extends Controller
         }
     }
 
-
-
-    
-    
     public function update(Request $request, $id)
     {
         try {
@@ -508,16 +504,19 @@ class EventoController extends Controller
                 ], 404);
             }
 
-            // Validación específica para estado
+            // Validación específica para todos los campos editables
             $rules = [];
             if ($request->has('estado')) {
                 $rules['estado'] = 'required|in:en_espera,en_proceso,completado';
             }
             if ($request->has('prioridad')) {
-                $rules['prioridad'] = 'in:alta,media,regular,baja';
+                $rules['prioridad'] = 'required|in:alta,media,regular,baja';
             }
             if ($request->has('observacion')) {
                 $rules['observacion'] = 'nullable|string|max:1000';
+            }
+            if ($request->has('enviar_soporte')) {
+                $rules['enviar_soporte'] = 'required|in:0,1';
             }
 
             try {
@@ -548,7 +547,12 @@ class EventoController extends Controller
 
             if (array_key_exists('observacion', $validated)) {
                 $evento->observacion = $validated['observacion'];
-                Log::info('Observacin actualizada');
+                Log::info('Observación actualizada');
+            }
+
+            if (isset($validated['enviar_soporte'])) {
+                $evento->enviar_soporte = $validated['enviar_soporte'];
+                Log::info('Enviar soporte actualizado a: ' . $validated['enviar_soporte']);
             }
 
             // Guardar cambios

@@ -33,6 +33,7 @@ class UpdateEventoRequest extends FormRequest
             'descripcion' => 'required|string|max:255',
             'condicion' => 'required|boolean',
             'estado' => 'sometimes|string|in:en_espera,en_proceso,completado',
+            'enviar_soporte' => 'required|boolean',
         ];
     }
 

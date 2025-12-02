@@ -330,6 +330,38 @@
         width: 120px;
     }
 }
+
+/* SweetAlert custom styles estilo profesor */
+.swal2-custom-popup {
+    background-color: #ffffff !important;
+    border-radius: 12px !important;
+    padding: 20px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
+}
+
+.swal2-custom-popup .swal2-title {
+    font-size: 1.5rem !important;
+    font-weight: 600;
+    color: #134496;
+}
+
+.swal2-custom-popup .form-control,
+.swal2-custom-popup .form-select {
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+@media (max-width: 576px) {
+    .swal2-custom-popup {
+        margin: 1rem !important;
+        padding: 15px !important;
+    }
+
+    .swal2-custom-popup .form-control,
+    .swal2-custom-popup .form-select {
+        font-size: 16px; /* Previene zoom en iOS */
+    }
+}
 </style>
 @endpush
 
@@ -396,6 +428,305 @@ function abrirModal(id) {
 
 function cerrarModal(id) {
     Swal.close();
+}
+
+// Modal estilo profesor para soporte
+async function abrirModalProfesor(evento) {
+    console.log('Evento recibido:', evento);
+    
+    let eventoData = evento; // usar evento original por defecto
+    
+    try {
+        // Obtener el estado actual del evento desde la base de datos
+        const response = await fetch(`/evento/${evento.id}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+        
+        if (response.ok) {
+            const eventoActualizado = await response.json();
+            console.log('Evento actualizado desde BD:', eventoActualizado);
+            eventoData = eventoActualizado.data || eventoActualizado;
+        } else {
+            console.log('Error en respuesta, usando evento original');
+        }
+        
+    } catch (error) {
+        console.error('Error al obtener evento:', error);
+        // Usar evento original si hay error
+    }
+    
+    // Mostrar modal siempre, con datos actualizados o originales
+    Swal.fire({
+        html: `
+        <div class="modal-contenido">
+            <div class="modal-encabezado">
+                <span class="icono-atras" onclick="Swal.close()">
+                    <i>
+                        <img width="40" height="40" src="https://img.icons8.com/external-solid-adri-ansyah/64/FAB005/external-ui-basic-ui-solid-adri-ansyah-26.png" alt="icono volver"/>
+                    </i>
+                </span>
+                <h1 class="titulo">Detalles</h1>
+            </div>
+
+            <div class="modal-cuerpo">
+                <div class="row">
+                    <div class="col">
+                        <!-- Datos del docente y evento -->
+                        <label>Docente:</label>
+                        <input type="text" value="${eventoData.usuario?.name ?? 'N/A'}" disabled>
+
+                        <label>Institución:</label>
+                        <input type="text" value="${eventoData.institucion?.nombre ?? ''}" disabled>
+
+                        <label>SubÁrea:</label>
+                        <input type="text" value="${eventoData.subarea?.nombre ?? ''}" disabled>
+
+                        <label>Sección:</label>
+                        <input type="text" value="${eventoData.seccion?.nombre ?? ''}" disabled>
+
+                        <label>Especialidad:</label>
+                        <input type="text" value="${eventoData.subarea?.especialidad?.nombre ?? ''}" disabled>
+                    </div>
+
+                    <div class="col">
+                        <!-- Datos de fecha, hora, prioridad y estado -->
+                        <label>Fecha:</label>
+                        <input type="text" value="${new Date(eventoData.fecha).toLocaleDateString('es-ES')}" disabled>
+                        
+                        <label>Hora:</label>
+                        <input type="text" value="${new Date(eventoData.hora_envio).toLocaleTimeString('es-ES', {hour: '2-digit', minute: '2-digit'})}" disabled>
+                        
+                        <label>Recinto:</label>
+                        <input type="text" value="${eventoData.horario?.recinto?.nombre ?? ''}" disabled>
+
+                        <label>Prioridad:</label>
+                        <input type="text" value="${eventoData.prioridad?.charAt(0).toUpperCase() + eventoData.prioridad?.slice(1)}" disabled>
+
+                        <label>Estado:</label>
+                        <select class="form-select mb-3" id="estadoInputProfesor">
+                            <option value="en_espera" ${eventoData.estado?.trim() === 'en_espera' ? 'selected' : ''}>En espera</option>
+                            <option value="en_proceso" ${eventoData.estado?.trim() === 'en_proceso' ? 'selected' : ''}>En proceso</option>
+                            <option value="completado" ${eventoData.estado?.trim() === 'completado' ? 'selected' : ''}>Completado</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="observaciones mt-3">
+                    <label>Observaciones:</label>
+                    <textarea disabled>${eventoData.observacion || ''}</textarea>
+                </div>
+
+                <!-- Botón guardar cambios centrado y pequeño -->
+                <div class="mt-4 d-flex justify-content-center">
+                    <button type="button" class="btn btn-primary px-4 py-2" style="background-color:#134496; min-width:150px;" onclick="guardarCambiosProfesor(${eventoData.id})">
+                        <i class="bi bi-save me-2"></i>Guardar cambios
+                    </button>
+                </div>
+            </div>
+        </div>
+        `,
+        width: '80%',
+        showConfirmButton: false,
+        showCloseButton: false,
+        customClass: {
+            container: 'modal-detalles-container',
+            popup: 'bg-transparent',
+            content: 'bg-transparent'
+        }
+    });
+}
+
+// Función auxiliar para mostrar modal con datos
+function mostrarModalConDatos(eventoData) {
+    Swal.fire({
+        html: `
+        <div class="modal-contenido">
+            <div class="modal-encabezado">
+                <span class="icono-atras" onclick="Swal.close()">
+                    <i>
+                        <img width="40" height="40" src="https://img.icons8.com/external-solid-adri-ansyah/64/FAB005/external-ui-basic-ui-solid-adri-ansyah-26.png" alt="icono volver"/>
+                    </i>
+                </span>
+                <h1 class="titulo">Detalles</h1>
+            </div>
+
+            <div class="modal-cuerpo">
+                <div class="row">
+                    <div class="col">
+                        <!-- Datos del docente y evento -->
+                        <label>Docente:</label>
+                        <input type="text" value="${eventoData.usuario?.name ?? 'N/A'}" disabled>
+
+                        <label>Institución:</label>
+                        <input type="text" value="${eventoData.institucion?.nombre ?? ''}" disabled>
+
+                        <label>SubÁrea:</label>
+                        <input type="text" value="${eventoData.subarea?.nombre ?? ''}" disabled>
+
+                        <label>Sección:</label>
+                        <input type="text" value="${eventoData.seccion?.nombre ?? ''}" disabled>
+
+                        <label>Especialidad:</label>
+                        <input type="text" value="${eventoData.subarea?.especialidad?.nombre ?? ''}" disabled>
+                    </div>
+
+                    <div class="col">
+                        <!-- Datos de fecha, hora, prioridad y estado -->
+                        <label>Fecha:</label>
+                        <input type="text" value="${new Date(eventoData.fecha).toLocaleDateString('es-ES')}" disabled>
+                        
+                        <label>Hora:</label>
+                        <input type="text" value="${new Date(eventoData.hora_envio).toLocaleTimeString('es-ES', {hour: '2-digit', minute: '2-digit'})}" disabled>
+                        
+                        <label>Recinto:</label>
+                        <input type="text" value="${eventoData.horario?.recinto?.nombre ?? ''}" disabled>
+
+                        <label>Prioridad:</label>
+                        <input type="text" value="${eventoData.prioridad?.charAt(0).toUpperCase() + eventoData.prioridad?.slice(1)}" disabled>
+
+                        <label>Estado:</label>
+                        <select class="form-select mb-3" id="estadoInputProfesor">
+                            <option value="en_espera" ${eventoData.estado?.trim() === 'en_espera' ? 'selected' : ''}>En espera</option>
+                            <option value="en_proceso" ${eventoData.estado?.trim() === 'en_proceso' ? 'selected' : ''}>En proceso</option>
+                            <option value="completado" ${eventoData.estado?.trim() === 'completado' ? 'selected' : ''}>Completado</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="observaciones mt-3">
+                    <label>Observaciones:</label>
+                    <textarea disabled>${eventoData.observacion || ''}</textarea>
+                </div>
+
+                <!-- Botón guardar cambios centrado y pequeño -->
+                <div class="mt-4 d-flex justify-content-center">
+                    <button type="button" class="btn btn-primary px-4 py-2" style="background-color:#134496; min-width:150px;" onclick="guardarCambiosProfesor(${eventoData.id})">
+                        <i class="bi bi-save me-2"></i>Guardar cambios
+                    </button>
+                </div>
+            </div>
+        </div>
+        `,
+        width: '80%',
+        showConfirmButton: false,
+        showCloseButton: false,
+        customClass: {
+            container: 'modal-detalles-container',
+            popup: 'bg-transparent',
+            content: 'bg-transparent'
+        }
+    });
+}
+async function guardarCambiosProfesor(id) {
+    try {
+        // Obtener el valor actual del select
+        const estadoSelect = document.getElementById('estadoInputProfesor');
+        const nuevoEstado = estadoSelect.value;
+        
+        console.log('Guardando cambios para evento:', id, 'nuevo estado:', nuevoEstado);
+        
+        const requestData = {
+            estado: nuevoEstado
+        };
+
+        const response = await fetch(`/evento/${id}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify(requestData)
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        console.log('Respuesta del servidor:', result);
+
+        if (result.success) {
+            // Cerrar el modal primero
+            Swal.close();
+            
+            // Mostrar notificación de éxito
+            Swal.fire({
+                icon: 'success',
+                title: 'Estado actualizado',
+                text: 'El estado del evento se ha actualizado correctamente.',
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 2500
+            });
+            
+            // Actualizar solo el estado en la tabla sin recargar todo
+            console.log('Actualizando estado en tabla a:', nuevoEstado);
+            updateEstadoEnTabla(id, nuevoEstado);
+        } else {
+            throw new Error(result.message || 'Error al actualizar el estado');
+        }
+
+    } catch (error) {
+        console.error('Error completo:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: error.message || 'Error al procesar la solicitud'
+        });
+    }
+}
+
+// Función para actualizar solo el estado en la tabla
+function updateEstadoEnTabla(eventoId, nuevoEstado) {
+    console.log('Actualizando estado en tabla:', eventoId, 'nuevo estado:', nuevoEstado);
+    
+    // Buscar la fila del evento en la tabla
+    const eventosRows = document.querySelectorAll('.record-row');
+    
+    eventosRows.forEach(row => {
+        const botonEditar = row.querySelector('button[onclick*="' + eventoId + '"]');
+        if (botonEditar) {
+            console.log('Fila encontrada para evento:', eventoId);
+            
+            // Encontrar el div del estado en esta fila
+            const estadoDiv = row.querySelector('[data-label="Estado"]');
+            if (estadoDiv) {
+                console.log('Estado div encontrado, actualizando a:', nuevoEstado);
+                
+                // Actualizar el contenido del estado con los nuevos badges
+                let estadoBadge = '';
+                switch(nuevoEstado) {
+                    case 'en_espera':
+                        estadoBadge = '<span class="badge estado-en-espera" style="background-color: #ffc107 !important; color: #000 !important;"><i class="bi bi-clock-fill me-1" style="color: #fff !important; font-size: 0.7rem !important;"></i>En Espera</span>';
+                        break;
+                    case 'en_proceso':
+                        estadoBadge = '<span class="badge estado-en-proceso" style="background-color: #17a2b8 !important; color: #fff !important;"><i class="bi bi-gear-fill me-1" style="font-size: 0.7rem !important;"></i>En Proceso</span>';
+                        break;
+                    case 'completado':
+                        estadoBadge = '<span class="badge estado-completado" style="background-color: #28a745 !important; color: #fff !important;"><i class="bi bi-check-circle-fill me-1" style="font-size: 0.7rem !important;"></i>Completado</span>';
+                        break;
+                    default:
+                        estadoBadge = '<span class="badge bg-secondary text-white" style="background-color: #6c757d !important; color: #fff !important;"><i class="bi bi-question-circle me-1" style="font-size: 0.7rem !important;"></i>' + nuevoEstado.charAt(0).toUpperCase() + nuevoEstado.slice(1) + '</span>';
+                }
+                
+                console.log('Aplicando badge:', estadoBadge);
+                estadoDiv.innerHTML = estadoBadge;
+                
+                console.log('Estado actualizado correctamente en la tabla');
+            } else {
+                console.log('No se encontró el div del estado');
+            }
+        }
+    });
 }
 
 // Limpiar intervalo cuando se abandona la página
